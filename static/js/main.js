@@ -9,6 +9,14 @@ document.addEventListener('DOMContentLoaded', function() {
     const extractForm = document.getElementById('extractForm');
     extractForm.addEventListener('submit', handleExtractSubmit);
     
+    // زر استخدام النص المباشر
+    const useDirectTextBtn = document.getElementById('useDirectTextBtn');
+    useDirectTextBtn.addEventListener('click', handleDirectTextSubmit);
+    
+    // زر تحميل الملف النصي
+    const loadFileBtn = document.getElementById('loadFileBtn');
+    loadFileBtn.addEventListener('click', handleFileUpload);
+    
     // زر حفظ النص
     const saveTextBtn = document.getElementById('saveTextBtn');
     saveTextBtn.addEventListener('click', handleSaveText);
@@ -34,7 +42,7 @@ document.addEventListener('DOMContentLoaded', function() {
     addQuestion();
 });
 
-// معالجة استخراج النص
+// معالجة استخراج النص من رابط
 async function handleExtractSubmit(e) {
     e.preventDefault();
     
@@ -74,6 +82,54 @@ async function handleExtractSubmit(e) {
     } finally {
         loadingModal.hide();
     }
+}
+
+// معالجة إدخال النص المباشر
+function handleDirectTextSubmit() {
+    const directTextInput = document.getElementById('directTextInput');
+    const text = directTextInput.value.trim();
+    
+    if (!text) {
+        showAlert('يرجى إدخال نص', 'danger');
+        return;
+    }
+    
+    extractedText = text;
+    displayExtractedText(extractedText);
+    document.getElementById('questionSection').style.display = 'block';
+    showAlert('تم استخدام النص بنجاح', 'success');
+}
+
+// معالجة تحميل ملف نصي
+function handleFileUpload() {
+    const fileInput = document.getElementById('fileInput');
+    const file = fileInput.files[0];
+    
+    if (!file) {
+        showAlert('يرجى اختيار ملف', 'danger');
+        return;
+    }
+    
+    // عرض مؤشر التحميل
+    document.getElementById('loadingMessage').textContent = 'جاري قراءة الملف...';
+    loadingModal.show();
+    
+    const reader = new FileReader();
+    
+    reader.onload = function(e) {
+        extractedText = e.target.result;
+        displayExtractedText(extractedText);
+        document.getElementById('questionSection').style.display = 'block';
+        loadingModal.hide();
+        showAlert('تم تحميل الملف بنجاح', 'success');
+    };
+    
+    reader.onerror = function() {
+        loadingModal.hide();
+        showAlert('حدث خطأ أثناء قراءة الملف', 'danger');
+    };
+    
+    reader.readAsText(file);
 }
 
 // عرض النص المستخرج
@@ -189,7 +245,10 @@ async function handleSubmitQuestions() {
             headers: {
                 'Content-Type': 'application/json'
             },
-            body: JSON.stringify({ questions })
+            body: JSON.stringify({ 
+                questions: questions,
+                text: extractedText
+            })
         });
         
         const data = await response.json();

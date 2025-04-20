@@ -26,28 +26,76 @@
                             </div>
                         </div>
 
-                        <!-- قسم استخراج النص -->
+                        <!-- قسم إدخال النص -->
                         <div class="card mb-4">
                             <div class="card-header bg-secondary text-white">
-                                <h2 class="h5 mb-0">القسم الأول: استخراج النص من رابط الإنترنت</h2>
+                                <h2 class="h5 mb-0">القسم الأول: إدخال النص</h2>
                             </div>
                             <div class="card-body">
-                                <form id="extractForm">
-                                    <div class="mb-3">
-                                        <label for="urlInput" class="form-label">رابط الإنترنت:</label>
-                                        <div class="input-group">
-                                            <input type="url" class="form-control" id="urlInput" name="url" placeholder="أدخل رابط الإنترنت هنا..." required>
-                                            <button type="submit" class="btn btn-primary">
-                                                <i class="bi bi-search me-1"></i> استخراج النص
+                                <!-- أزرار التبديل بين طرق إدخال النص -->
+                                <ul class="nav nav-tabs mb-3" id="textInputTabs" role="tablist">
+                                    <li class="nav-item" role="presentation">
+                                        <button class="nav-link active" id="url-tab" data-bs-toggle="tab" data-bs-target="#url-tab-pane" type="button" role="tab" aria-controls="url-tab-pane" aria-selected="true">
+                                            <i class="bi bi-link me-1"></i> استخراج من رابط
+                                        </button>
+                                    </li>
+                                    <li class="nav-item" role="presentation">
+                                        <button class="nav-link" id="direct-tab" data-bs-toggle="tab" data-bs-target="#direct-tab-pane" type="button" role="tab" aria-controls="direct-tab-pane" aria-selected="false">
+                                            <i class="bi bi-pencil-square me-1"></i> إدخال نص مباشر
+                                        </button>
+                                    </li>
+                                    <li class="nav-item" role="presentation">
+                                        <button class="nav-link" id="file-tab" data-bs-toggle="tab" data-bs-target="#file-tab-pane" type="button" role="tab" aria-controls="file-tab-pane" aria-selected="false">
+                                            <i class="bi bi-file-text me-1"></i> تحميل ملف نصي
+                                        </button>
+                                    </li>
+                                </ul>
+                                
+                                <!-- محتوى التبويبات -->
+                                <div class="tab-content" id="textInputTabsContent">
+                                    <!-- تبويب استخراج من رابط -->
+                                    <div class="tab-pane fade show active" id="url-tab-pane" role="tabpanel" aria-labelledby="url-tab" tabindex="0">
+                                        <form id="extractForm">
+                                            <div class="mb-3">
+                                                <label for="urlInput" class="form-label">رابط الإنترنت:</label>
+                                                <div class="input-group">
+                                                    <input type="url" class="form-control" id="urlInput" name="url" placeholder="أدخل رابط الإنترنت هنا..." required>
+                                                    <button type="submit" class="btn btn-primary">
+                                                        <i class="bi bi-search me-1"></i> استخراج النص
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </form>
+                                    </div>
+                                    
+                                    <!-- تبويب إدخال نص مباشر -->
+                                    <div class="tab-pane fade" id="direct-tab-pane" role="tabpanel" aria-labelledby="direct-tab" tabindex="0">
+                                        <div class="mb-3">
+                                            <label for="directTextInput" class="form-label">أدخل النص مباشرة:</label>
+                                            <textarea class="form-control" id="directTextInput" rows="6" placeholder="أدخل النص هنا..."></textarea>
+                                            <button type="button" class="btn btn-primary mt-2" id="useDirectTextBtn">
+                                                <i class="bi bi-check-circle me-1"></i> استخدام هذا النص
                                             </button>
                                         </div>
                                     </div>
-                                </form>
+                                    
+                                    <!-- تبويب تحميل ملف نصي -->
+                                    <div class="tab-pane fade" id="file-tab-pane" role="tabpanel" aria-labelledby="file-tab" tabindex="0">
+                                        <div class="mb-3">
+                                            <label for="fileInput" class="form-label">اختر ملفًا نصيًا:</label>
+                                            <input class="form-control" type="file" id="fileInput" accept=".txt,.text,.md,.csv">
+                                            <button type="button" class="btn btn-primary mt-2" id="loadFileBtn">
+                                                <i class="bi bi-upload me-1"></i> تحميل الملف
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
                                 
+                                <!-- قسم عرض النص -->
                                 <div class="mb-3 mt-4" id="extractedTextSection" style="display: none;">
-                                    <label for="extractedText" class="form-label">النص المستخرج:</label>
+                                    <label for="extractedText" class="form-label">النص:</label>
                                     <div class="position-relative">
-                                        <textarea class="form-control" id="extractedText" rows="10" readonly></textarea>
+                                        <textarea class="form-control" id="extractedText" rows="10"></textarea>
                                         <button class="btn btn-sm btn-outline-secondary position-absolute top-0 end-0 m-2" id="saveTextBtn">
                                             <i class="bi bi-download"></i> حفظ النص
                                         </button>
