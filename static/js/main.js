@@ -72,7 +72,6 @@ async function handleExtractSubmit(e) {
         if (response.ok) {
             extractedText = data.text;
             displayExtractedText(extractedText);
-            document.getElementById('questionSection').style.display = 'block';
         } else {
             showAlert(data.error || 'حدث خطأ أثناء استخراج النص', 'danger');
         }
@@ -96,7 +95,6 @@ function handleDirectTextSubmit() {
     
     extractedText = text;
     displayExtractedText(extractedText);
-    document.getElementById('questionSection').style.display = 'block';
     showAlert('تم استخدام النص بنجاح', 'success');
 }
 
@@ -119,7 +117,6 @@ function handleFileUpload() {
     reader.onload = function(e) {
         extractedText = e.target.result;
         displayExtractedText(extractedText);
-        document.getElementById('questionSection').style.display = 'block';
         loadingModal.hide();
         showAlert('تم تحميل الملف بنجاح', 'success');
     };

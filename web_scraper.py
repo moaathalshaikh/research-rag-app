@@ -26,6 +26,16 @@ class WebScraper:
             "aside", "nav", "iframe", "svg", "button", "form", "input"
         ]
         self.content_tags = ["p", "h1", "h2", "h3", "h4", "h5", "h6", "article", "section", "main", "div.content", "div.article"]
+        
+        # محددات خاصة لمواقع مختلفة
+        self.site_specific_selectors = {
+            "stackexchange.com": [".question-page #question .post-text", ".question-page .answer .post-text"],
+            "stackoverflow.com": [".question-page #question .post-text", ".question-page .answer .post-text"],
+            "serverfault.com": [".question-page #question .post-text", ".question-page .answer .post-text"],
+            "superuser.com": [".question-page #question .post-text", ".question-page .answer .post-text"],
+            "askubuntu.com": [".question-page #question .post-text", ".question-page .answer .post-text"],
+            "pm.stackexchange.com": [".question .s-prose", ".answer .s-prose", ".postcell", ".answercell .post-text", "#question .post-text", "#answers .post-text"]
+        }
     
     def extract_text(self, url):
         """استخراج النص من رابط URL"""
@@ -48,7 +58,7 @@ class WebScraper:
             self._remove_unwanted_elements(soup)
             
             # استخراج النص
-            text = self._extract_clean_text(soup)
+            text = self._extract_clean_text(soup, url)
             
             logger.info(f"تم استخراج {len(text)} حرف من النص")
             return text
@@ -69,7 +79,7 @@ class WebScraper:
     def _get_page_content(self, url):
         """الحصول على محتوى الصفحة مع معالجة الأخطاء"""
         try:
-            response = requests.get(url, headers=self.headers, timeout=10)
+            response = requests.get(url, headers=self.headers, timeout=15)
             response.raise_for_status()
             return response
         except requests.exceptions.HTTPError as e:
@@ -92,8 +102,32 @@ class WebScraper:
             for element in soup.select(tag):
                 element.extract()
     
-    def _extract_clean_text(self, soup):
+    def _is_stack_exchange(self, url):
+        """التحقق مما إذا كان الرابط ينتمي إلى مواقع Stack Exchange"""
+        parsed_url = urlparse(url)
+        domain = parsed_url.netloc.lower()
+        
+        # التحقق من النطاقات المعروفة لـ Stack Exchange
+        stack_domains = list(self.site_specific_selectors.keys())
+        
+        for stack_domain in stack_domains:
+            if stack_domain in domain:
+                return True, stack_domain
+                
+        # التحقق من النطاقات الفرعية لـ stackexchange.com
+        if domain.endswith('stackexchange.com'):
+            return True, 'stackexchange.com'
+            
+        return False, None
+    
+    def _extract_clean_text(self, soup, url):
         """استخراج وتنظيف النص من المحتوى"""
+        # التحقق مما إذا كان الموقع من مواقع Stack Exchange
+        is_stack, stack_domain = self._is_stack_exchange(url)
+        
+        if is_stack:
+            return self._extract_stack_exchange_text(soup, stack_domain)
+        
         # محاولة استخراج المحتوى الرئيسي أولاً
         main_content = None
         for selector in ["article", "main", ".content", ".article", "#content", "#main"]:
@@ -111,6 +145,42 @@ class WebScraper:
         text = self._clean_text(text)
         
         return text
+    
+    def _extract_stack_exchange_text(self, soup, domain):
+        """استخراج النص من مواقع Stack Exchange"""
+        logger.info(f"استخراج النص من موقع Stack Exchange: {domain}")
+        
+        # الحصول على المحددات الخاصة بالموقع
+        selectors = self.site_specific_selectors.get(domain, self.site_specific_selectors['stackexchange.com'])
+        
+        # جمع النص من جميع المحددات
+        text_parts = []
+        
+        # إضافة عنوان السؤال
+        title = soup.select_one('h1')
+        if title:
+            text_parts.append(f"العنوان: {title.get_text(strip=True)}\n\n")
+        
+        # استخراج نص السؤال والإجابات
+        for selector in selectors:
+            elements = soup.select(selector)
+            if elements:
+                for element in elements:
+                    # تنظيف العنصر من الأكواد البرمجية والمكونات غير النصية
+                    for code in element.select('pre, code'):
+                        code.extract()
+                    
+                    text = element.get_text(separator=' ', strip=True)
+                    if text:
+                        text_parts.append(text)
+        
+        # دمج النصوص المستخرجة
+        combined_text = "\n\n".join(text_parts)
+        
+        # تنظيف النص
+        clean_text = self._clean_text(combined_text)
+        
+        return clean_text
     
     def _clean_text(self, text):
         """تنظيف النص المستخرج"""
@@ -136,5 +206,5 @@ def extract_text_from_url(url):
 
 # اختبار الوحدة إذا تم تشغيل الملف مباشرة
 if __name__ == "__main__":
-    test_url = "https://ar.wikipedia.org/wiki/الذكاء_الاصطناعي"
+    test_url = "https://pm.stackexchange.com/questions/11144/constantly-under-estimating-user-stories"
     print(extract_text_from_url(test_url))
