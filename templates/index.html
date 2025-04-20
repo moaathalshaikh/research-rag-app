@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>نظام البحث باستخدام RAG</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.rtl.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <div class="container mt-4">
+        <div class="row">
+            <div class="col-12">
+                <div class="card shadow-sm">
+                    <div class="card-header bg-primary text-white">
+                        <h1 class="text-center mb-0">نظام البحث باستخدام RAG</h1>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-12">
+                                <div class="alert alert-info">
+                                    <i class="bi bi-info-circle-fill me-2"></i>
+                                    هذا النظام يسمح باستخراج النص من روابط الإنترنت والإجابة على الأسئلة البحثية باستخدام تقنية RAG (Retrieval Augmented Generation).
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- قسم استخراج النص -->
+                        <div class="card mb-4">
+                            <div class="card-header bg-secondary text-white">
+                                <h2 class="h5 mb-0">القسم الأول: استخراج النص من رابط الإنترنت</h2>
+                            </div>
+                            <div class="card-body">
+                                <form id="extractForm">
+                                    <div class="mb-3">
+                                        <label for="urlInput" class="form-label">رابط الإنترنت:</label>
+                                        <div class="input-group">
+                                            <input type="url" class="form-control" id="urlInput" name="url" placeholder="أدخل رابط الإنترنت هنا..." required>
+                                            <button type="submit" class="btn btn-primary">
+                                                <i class="bi bi-search me-1"></i> استخراج النص
+                                            </button>
+                                        </div>
+                                    </div>
+                                </form>
+                                
+                                <div class="mb-3 mt-4" id="extractedTextSection" style="display: none;">
+                                    <label for="extractedText" class="form-label">النص المستخرج:</label>
+                                    <div class="position-relative">
+                                        <textarea class="form-control" id="extractedText" rows="10" readonly></textarea>
+                                        <button class="btn btn-sm btn-outline-secondary position-absolute top-0 end-0 m-2" id="saveTextBtn">
+                                            <i class="bi bi-download"></i> حفظ النص
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- قسم الأسئلة البحثية -->
+                        <div class="card mb-4" id="questionSection" style="display: none;">
+                            <div class="card-header bg-secondary text-white">
+                                <h2 class="h5 mb-0">القسم الثاني: الأسئلة البحثية</h2>
+                            </div>
+                            <div class="card-body">
+                                <div class="mb-3">
+                                    <label class="form-label">الأسئلة البحثية:</label>
+                                    <div id="questionsContainer">
+                                        <div class="input-group mb-2">
+                                            <input type="text" class="form-control question-input" placeholder="أدخل سؤالك البحثي هنا..." required>
+                                            <button type="button" class="btn btn-danger remove-question" style="display: none;">
+                                                <i class="bi bi-trash"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+                                    <div class="d-flex justify-content-between mt-2">
+                                        <button type="button" class="btn btn-outline-primary" id="addQuestionBtn">
+                                            <i class="bi bi-plus-circle me-1"></i> إضافة سؤال
+                                        </button>
+                                        <button type="button" class="btn btn-success" id="submitQuestionsBtn">
+                                            <i class="bi bi-send me-1"></i> إرسال الأسئلة
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- قسم النتائج -->
+                        <div class="card" id="resultsSection" style="display: none;">
+                            <div class="card-header bg-success text-white">
+                                <h2 class="h5 mb-0">النتائج</h2>
+                            </div>
+                            <div class="card-body">
+                                <div id="resultsContainer"></div>
+                                
+                                <div class="mt-4">
+                                    <h5>تصدير النتائج:</h5>
+                                    <div class="btn-group">
+                                        <button type="button" class="btn btn-outline-primary export-btn" data-format="txt">
+                                            <i class="bi bi-file-text me-1"></i> TXT
+                                        </button>
+                                        <button type="button" class="btn btn-outline-primary export-btn" data-format="csv">
+                                            <i class="bi bi-filetype-csv me-1"></i> CSV
+                                        </button>
+                                        <button type="button" class="btn btn-outline-primary export-btn" data-format="json">
+                                            <i class="bi bi-filetype-json me-1"></i> JSON
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card-footer text-center">
+                        <p class="mb-0">تم تطويره بواسطة <a href="https://github.com/moaathalshaikh" target="_blank">معاذ الشيخ</a></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal للتحميل -->
+    <div class="modal fade" id="loadingModal" tabindex="-1" aria-hidden="true" data-bs-backdrop="static">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-body text-center p-4">
+                    <div class="spinner-border text-primary mb-3" role="status"></div>
+                    <h5 id="loadingMessage">جاري المعالجة...</h5>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+</body>
+</html>

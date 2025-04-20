@@ -1,0 +1,88 @@
+/* الأنماط العامة */
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: #f8f9fa;
+}
+
+.card {
+    border-radius: 10px;
+    overflow: hidden;
+    margin-bottom: 20px;
+}
+
+.card-header {
+    font-weight: bold;
+}
+
+/* أنماط مربع النص */
+#extractedText {
+    direction: rtl;
+    text-align: right;
+    font-size: 14px;
+    line-height: 1.6;
+    resize: vertical;
+    min-height: 200px;
+}
+
+/* أنماط الأسئلة */
+.question-input {
+    border-radius: 5px 0 0 5px !important;
+}
+
+.remove-question {
+    border-radius: 0 5px 5px 0 !important;
+}
+
+/* أنماط النتائج */
+.result-card {
+    background-color: #f8f9fa;
+    border-right: 4px solid #0d6efd;
+    margin-bottom: 15px;
+    padding: 15px;
+    border-radius: 5px;
+}
+
+.question-text {
+    font-weight: bold;
+    color: #0d6efd;
+    margin-bottom: 10px;
+}
+
+.answer-text {
+    white-space: pre-line;
+    line-height: 1.6;
+}
+
+/* أنماط أزرار التصدير */
+.export-btn {
+    margin-right: 5px;
+}
+
+/* أنماط المؤشر */
+.spinner-border {
+    width: 3rem;
+    height: 3rem;
+}
+
+/* تحسينات للأجهزة المحمولة */
+@media (max-width: 768px) {
+    .container {
+        padding: 10px;
+    }
+    
+    .card-body {
+        padding: 15px;
+    }
+    
+    .btn-group {
+        display: flex;
+        flex-direction: column;
+        width: 100%;
+    }
+    
+    .export-btn {
+        margin-right: 0;
+        margin-bottom: 5px;
+        border-radius: 5px !important;
+    }
+}
