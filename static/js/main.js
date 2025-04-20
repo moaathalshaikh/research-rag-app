@@ -5,10 +5,6 @@ const loadingModal = new bootstrap.Modal(document.getElementById('loadingModal')
 
 // عند تحميل الصفحة
 document.addEventListener('DOMContentLoaded', function() {
-    // نموذج استخراج النص
-    const extractForm = document.getElementById('extractForm');
-    extractForm.addEventListener('submit', handleExtractSubmit);
-    
     // زر استخدام النص المباشر
     const useDirectTextBtn = document.getElementById('useDirectTextBtn');
     useDirectTextBtn.addEventListener('click', handleDirectTextSubmit);
@@ -41,47 +37,6 @@ document.addEventListener('DOMContentLoaded', function() {
     // إضافة سؤال أول افتراضي
     addQuestion();
 });
-
-// معالجة استخراج النص من رابط
-async function handleExtractSubmit(e) {
-    e.preventDefault();
-    
-    const urlInput = document.getElementById('urlInput');
-    const url = urlInput.value.trim();
-    
-    if (!url) {
-        showAlert('يرجى إدخال رابط صحيح', 'danger');
-        return;
-    }
-    
-    // عرض مؤشر التحميل
-    document.getElementById('loadingMessage').textContent = 'جاري استخراج النص من الرابط...';
-    loadingModal.show();
-    
-    try {
-        const formData = new FormData();
-        formData.append('url', url);
-        
-        const response = await fetch('/extract', {
-            method: 'POST',
-            body: formData
-        });
-        
-        const data = await response.json();
-        
-        if (response.ok) {
-            extractedText = data.text;
-            displayExtractedText(extractedText);
-        } else {
-            showAlert(data.error || 'حدث خطأ أثناء استخراج النص', 'danger');
-        }
-    } catch (error) {
-        showAlert('حدث خطأ في الاتصال بالخادم', 'danger');
-        console.error(error);
-    } finally {
-        loadingModal.hide();
-    }
-}
 
 // معالجة إدخال النص المباشر
 function handleDirectTextSubmit() {
